@@ -1,0 +1,87 @@
+
+<html>
+    <head>
+    <title>Google Gauge - ThingSpeak Example</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
+  <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+  <script type='text/javascript'>
+  
+    // set your channel id here
+    var channel_id = 1749282;
+    // set your channel's read api key here if necessary
+    var api_key = 'N6X9MSXNOGB1KW8N';
+    // maximum value for the gauge
+    var max_gauge_value = 70;
+    // name of the gauge
+    var gauge_name = 'Humidity';
+  
+    // global variables
+    var chart, charts, data;
+  
+    // load the google gauge visualization
+    google.load('visualization', '1', {packages:['gauge']});
+    google.setOnLoadCallback(initChart);
+  
+    // display the data
+    function displayData(point) {
+      data.setValue(0, 0, gauge_name);
+      data.setValue(0, 1, point);
+      chart.draw(data, options);
+    }
+  
+    // load the data
+    function loadData() {
+      // variable for the data point
+      var p;
+  
+      // get the data from thingspeak
+      $.getJSON('https://api.thingspeak.com/channels/' + channel_id + '/feed/last.json?api_key=' + api_key, function(data) {
+  
+        // get the data point
+        p = data.field2;
+  
+        // if there is a data point display it
+        if (p) {
+          // p = Math.round((p / max_gauge_value) * 100);
+          displayData(p);
+        }
+  
+      });
+    }
+  
+    // initialize the chart
+    function initChart() {
+  
+      data = new google.visualization.DataTable();
+      data.addColumn('string', 'Label');
+      data.addColumn('number', 'Value');
+      data.addRows(1);
+  
+      chart = new google.visualization.Gauge(document.getElementById('gauge_div'));
+      options = {width: 500, height: 500, greenFrom: 50, greenTo: 100, redFrom: 0, redTo: 25, yellowFrom:20, yellowTo: 50, minorTicks: 5};
+  
+      loadData();
+  
+      // load new data every 15 seconds
+      setInterval('loadData()', 15000);
+    }
+  
+  </script>
+    </head>
+    <body>
+      <div>
+        <div id="gauge_div">
+        </div>
+        <h2>Humidity</h2>
+        <body>
+          <div class="navbar">
+            <a href="index.html"active">Temprature</a>
+            <a href= "Humidity.html">Humidity</a>
+            <a href="Soil_Moisture.html" >Soil Moisture</a>
+            <!-- <a href="Control_time.html" >Reduce energy</a> -->
+          </div>
+      </div>
+      
+    </body>
+  </html>
